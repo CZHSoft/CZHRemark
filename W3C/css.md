@@ -2,7 +2,10 @@
 ## 添加的方式
 > * 1.行间样式 style=""  
 > * 2.页面级样式 head  <style></style>  
-> * 3.外部css文件 head <link rel="stylesheet" type="text/css" href="地址">  
+> * 3.外部css文件 head 
+```html
+<link rel="stylesheet" type="text/css" href="地址">  
+```
 ## css选择器类型
 > * 1.id选择器:#
 > * 2.class选择器:.
