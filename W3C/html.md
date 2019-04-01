@@ -1,9 +1,9 @@
 # html基础
 
 ## 模块化
->html
->>head
->>body
+```html
+<html><head></head><body></body></html>
+```
 ## head
 ### 字符集
 ```html
@@ -54,7 +54,7 @@
 ### ‘<’符号
 ```html
 &lt;
-```html
+```
 ### ‘>’符号
 ```html
 &gt;
@@ -62,7 +62,7 @@
 ### 换行
 ```html
 <br>
-```html
+```
 ### 行线
 ```html
 <hr>
