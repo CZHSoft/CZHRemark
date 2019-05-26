@@ -487,6 +487,148 @@ else
     commit transaction  
   end  
 
+### 存储过程
+create table books (  
+    book_id int identity(1,1) primary key,  
+    book_name varchar(20),  
+    book_price float,  
+    book_auth varchar(10)  
+);  
+insert into books (book_name,book_price,book_auth) values  
+('论语',25.6,'孔子'),  
+('天龙八部',25.6,'金庸'),  
+('雪山飞狐',32.7,'金庸'),  
+('平凡的世界',35.8,'路遥'),  
+('史记',54.8,'司马迁');  
+
+--带返回值的存储过程
+create proc getBookId(  
+    @bookAuth varchar(20),--输入参数,无默认值  
+    @bookId int output --输入/输出参数 无默认值  
+)  
+as  
+select @bookId=book_id from books where book_auth=@bookAuth  
+
+--执行getBookId
+declare @id int --声明一个变量用来接收执行存储过程后的返回值  
+exec getBookId '孔子',@id output  
+select @id as bookId;--as是给返回的列值起一个名字  
+
+--带游标的存储过程
+create proc book_cursor  
+@bookCursor cursor varying output  
+as  
+set @bookCursor=cursor forward_only static for  
+select book_id,book_name,book_auth from books  
+open @bookCursor;  
+
+--调用book_cursor存储过程
+declare @cur cursor,  
+@bookID int,  
+@bookName varchar(20),  
+@bookAuth varchar(20);  
+exec book_cursor @bookCursor=@cur output;  
+fetch next from @cur into @bookID,@bookName,@bookAuth;  
+while(@@FETCH_STATUS=0)  
+begin  
+fetch next from @cur into @bookID,@bookName,@bookAuth;  
+print 'bookID:'+convert(varchar,@bookID)+' , bookName: '+ @bookName  +' ,bookAuth: '+@bookAuth;  
+end  
+close @cur    --关闭游标  
+DEALLOCATE @cur; --释放游标  
+
+--分页存储过程
+create proc book_page(  
+    @TableName varchar(50),            --表名  
+    @ReFieldsStr varchar(200) = '*',   --字段名(全部字段为*)  
+    @OrderString varchar(200),         --排序字段(必须!支持多字段不用加order by)  
+    @WhereString varchar(500) =N'',  --条件语句(不用加where)  
+    @PageSize int,                     --每页多少条记录  
+    @PageIndex int = 1 ,               --指定当前为第几页  
+    @TotalRecord int output            --返回总记录数  
+)  
+as  
+begin  
+    --处理开始点和结束点  
+    Declare @StartRecord int;  
+    Declare @EndRecord int;  
+    Declare @TotalCountSql nvarchar(500);  
+    Declare @SqlString nvarchar(2000);  
+    set @StartRecord = (@PageIndex-1)*@PageSize + 1  
+    set @EndRecord = @StartRecord + @PageSize - 1   
+    SET @TotalCountSql= N'select @TotalRecord = count(*) from ' + @TableName;--总记录数语句  
+    SET @SqlString = N'(select row_number() over (order by '+ @OrderString +') as rowId,'+@ReFieldsStr+' from '+ @TableName;--查询语句  
+    --
+    IF (@WhereString! = '' or @WhereString!=null)  
+        BEGIN  
+            SET @TotalCountSql=@TotalCountSql + '  where '+ @WhereString;  
+            SET @SqlString =@SqlString+ '  where '+ @WhereString;           
+        END  
+		
+    EXEC sp_executesql @totalCountSql,N'@TotalRecord int out',@TotalRecord output;--返回总记录数  
+    ----执行主语句  
+    set @SqlString ='select * from ' + @SqlString + ') as t where rowId between ' + ltrim(str(@StartRecord)) + ' and ' +  ltrim(str(@EndRecord));  
+    Exec(@SqlString)  
+END  
+
+--使用分页存储过程  
+declare @totalCount int  
+exec book_page 'books','*','book_id','',3,1,@totalCount output;   
+select @totalCount as totalCount;--总记录数  
+
+### 临时表
+--本地临时表  
+CREATE TABLE #Temp  
+(  
+    id int,  
+    customer_name nvarchar(50),  
+    age int  
+)  
+
+--全局临时表  
+CREATE TABLE ##Temp2  
+(  
+    id int,  
+    customer_name nvarchar(50),  
+    age int  
+)  
+
+### 锁
+--HOLDLOCK: 在该表上保持共享锁，直到整个事务结束，而不是在语句执行完立即释放所添加的锁。  　　 
+--NOLOCK：不添加共享锁和排它锁，当这个选项生效后，可能读到未提交读的数据或“脏数据”，这个选项仅仅应用于SELECT语句。  　　 
+--PAGLOCK：指定添加页锁（否则通常可能添加表锁）。  　 
+--READCOMMITTED用与运行在提交读隔离级别的事务相同的锁语义执行扫描。默认情况下，SQL Server 2000 在此隔离级别上操作。   
+--READPAST: 跳过已经加锁的数据行，这个选项将使事务读取数据时跳过那些已经被其他事务锁定的数据行，而不是阻塞直到其他事务释放锁，READPAST仅仅应用于READ COMMITTED隔离性级别下事务操作中的SELECT语句操作。  　　
+--READUNCOMMITTED：等同于NOLOCK。  
+--ROWLOCK：使用行级锁，而不使用粒度更粗的页级锁和表级锁。  　　 
+--SERIALIZABLE：用与运行在可串行读隔离级别的事务相同的锁语义执行扫描。等同于 HOLDLOCK。  　 
+--TABLOCK：指定使用表级锁，而不是使用行级或页面级的锁，SQL Server在该语句执行完后释放这个锁，而如果同时指定了HOLDLOCK，该锁一直保持到这个事务结束。  　　
+--TABLOCKX：指定在表上使用排它锁，这个锁可以阻止其他事务读或更新这个表的数据，直到这个语句或整个事务结束。  　 
+--UPDLOCK ：指定在读表中数据时设置更新 锁（update lock）而不是设置共享锁，该锁一直保持到这个语句或整个事务结束，使用UPDLOCK的作用是允许用户先读取数据（而且不阻塞其他用户读数据），并且保证在后来再更新数据时，这一段时间内这些数据没有被其他用户修改。  
+
+--将锁超时期限设置为 1,800 毫秒。
+SET LOCK_TIMEOUT 1800
+
+--锁一个表的某一行
+SELECT * FROM table ROWLOCK WHERE id = 1
+
+--锁定数据库的一个表
+SELECT * FROM table WITH (HOLDLOCK)
+
+--粒度锁：PAGLOCK, TABLOCK, TABLOCKX, ROWLOCK, NOLOCK
+--模式锁：HOLDLOCK, UPDLOCK, XLOCK
+
+--经验：select 查询 不加锁的情况 添加 nolock，在提升性能的同时，也会产生脏读现象。
+
+
+
+
+
+
+
+
+
+
 
 
 	
