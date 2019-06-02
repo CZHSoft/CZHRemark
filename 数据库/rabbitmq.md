@@ -24,9 +24,9 @@ Binding：队列与交换器间的关联绑定。消费者将关注的队列绑�
 Virtual Host：虚拟主机，虚拟主机提供资源的逻辑分组和分离。包含连接，交换，队列，绑定，用户权限，策略等。  
 Broker：消息队列的服务器实体。  
 
-##.net的基础用法
+## .net的基础用法
 
-###消费者
+消费者:
             IConnectionFactory connFactory = new ConnectionFactory//1.创建连接工厂对象  
             {  
                 HostName = "127.0.0.1",//IP地址  
@@ -64,7 +64,7 @@ Broker：消息队列的服务器实体。
 					//这里需要用一些方法堵塞，保证方法保持监听和退出  
                 }  
             }  
-###生产者
+生产者:
 			IConnectionFactory conFactory = new ConnectionFactory//1.创建连接工厂对象  
             {  
                 HostName = "127.0.0.1",//IP地址  
@@ -94,7 +94,7 @@ Broker：消息队列的服务器实体。
                 }  
             }  
 			
-##模式
+## 模式
 
 ### worker
 MQ会默认按照消费者的接入顺序分配任务到多个消费者。 
@@ -123,7 +123,7 @@ MQ会默认按照消费者的接入顺序分配任务到多个消费者。
 
 ### Publish/Subscribe(发布订阅)
 
-####   fanout
+#### fanout
 该模式可以通过不同的交换器名称路由到对应的队列。  
 生产者:  
 var exchangeName = "exchange1";  
