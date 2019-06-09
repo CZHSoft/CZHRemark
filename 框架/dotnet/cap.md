@@ -38,41 +38,41 @@ Startup->ConfigureServices中添加服务:
 ## 代码
 订单系统的消息发布者:
     public interface IOrderRepository
-    {
-        bool CreateOrder(Order order);
-    } 
+    {  
+        bool CreateOrder(Order order);  
+    }  
 	
-	public class OrderRepository : IOrderRepository
-    {
-        public readonly OrderContext _context; //ef 订单上下文
-        public readonly ICapPublisher _capPublisher;//cap 消息发布者
+	public class OrderRepository : IOrderRepository  
+    {  
+        public readonly OrderContext _context; //ef 订单上下文  
+        public readonly ICapPublisher _capPublisher;//cap 消息发布者  
 
-        public OrderRepository(OrderContext context, ICapPublisher capPublisher)
-        {
-            this._context = context;
-            this._capPublisher = capPublisher;
-        }
+        public OrderRepository(OrderContext context, ICapPublisher capPublisher)  
+        {  
+            this._context = context;  
+            this._capPublisher = capPublisher;  
+        }  
 
-        public bool CreateOrder(Order order)
-        {
-            using (var trans = _context.Database.BeginTransaction())
-            {
-                var orderEntity = new Order()
-                {
-                    OrderTime = order.OrderTime
-                };
+        public bool CreateOrder(Order order)  
+        {  
+            using (var trans = _context.Database.BeginTransaction())  
+            {  
+                var orderEntity = new Order()  
+                {  
+                    OrderTime = order.OrderTime  
+                };  
 
-                _context.Orders.Add(orderEntity);
-                _context.SaveChanges();
+                _context.Orders.Add(orderEntity);  
+                _context.SaveChanges();  
 
-                _capPublisher.Publish("czhsoft.services.order.create", orderEntity);
+                _capPublisher.Publish("czhsoft.services.order.create", orderEntity);  
 
-                trans.Commit();
-            }
+                trans.Commit();  
+            }  
 
-            return true;
-        }
-    }
+            return true;  
+        }  
+    }  
 	
 其它子系统的消息订阅者：  
 	public interface IOrderSubscriberService  
