@@ -1,7 +1,7 @@
 # 前言
 Rabbit MQ 是在Erlang下实现的一个消息队列框架平台。
  
-## 配置使用
+# 配置使用
 1.在开始菜单中找到RabbitMQ Command Promt，打开控制台  
 2.输入 rabbitmq-plugins enable rabbitmq_management  
 3.访问 http://localhost:15672  guest  guest  
@@ -26,7 +26,7 @@ Broker：消息队列的服务器实体。
 
 ## .net的基础用法
 
-消费者:
+消费者:  
             IConnectionFactory connFactory = new ConnectionFactory//1.创建连接工厂对象  
             {  
                 HostName = "127.0.0.1",//IP地址  
@@ -64,7 +64,7 @@ Broker：消息队列的服务器实体。
 					//这里需要用一些方法堵塞，保证方法保持监听和退出  
                 }  
             }  
-生产者:
+生产者:  
 			IConnectionFactory conFactory = new ConnectionFactory//1.创建连接工厂对象  
             {  
                 HostName = "127.0.0.1",//IP地址  
@@ -270,7 +270,9 @@ RPC——Remote Procedure Call，远程过程调用。
 2019/6/2 17:27:22: queue rpc1 guidfa7c5d3d-335c-4003-925a-c8d1f92f023d RPC服务返回运算结果 55   
 2019/6/2 17:27:22: queue rpc1 RPC调用 返回55   
 
-
+# MQ的应用场景
+> * 用作消息缓存，解决高并发和高可用的场景 。
+> * 用作发布订阅或观察者模式下，保证通讯之间消息的消费者和生产者的可用性和一致性，例如CAP框架。
 
 
 
