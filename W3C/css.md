@@ -28,7 +28,7 @@ line-height:行间隔
 text-indent:文本缩进 em  
 text-decoration:文本修饰，加线条  
 cursor:光标值  
-hover:伪类，光标选中元素时触发  
+:hover:伪类，光标选中元素时触发  
 ## 元素行块分类
 > * 1.行级元素 span|strong|em|a|del  
 > * 2.块级元素 div|p|ul|ol|li|form|address  
@@ -58,3 +58,6 @@ list-style:none 去掉列表所有符号特性
 > * overflow:hidden 内容超出块元素不显示
 > * text-overflow:ellipsis 文本溢出变成...
 > * background-img background-size background-repeat background-position
+
+### 后记
+> * calc() 函数用于动态计算长度值。
