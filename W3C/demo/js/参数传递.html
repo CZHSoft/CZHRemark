@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+</head>
+
+<body>
+    <script>
+        //值传递
+        var value = 1;
+        function foo(v) {
+            v = 2;
+            console.log(v); //2
+        }
+        foo(value);
+        console.log(value) // 1
+
+        //引用传递
+        var obj = {
+            value: 1
+        };
+        function foo2(o) {
+            o.value = 2;
+            console.log(o.value); //2
+        }
+        foo2(obj);
+        console.log(obj.value) // 2
+
+        //共享传递
+        var obj2 = {
+            value: 1
+        };
+        function foo3(o) {
+            o = 2;
+            console.log(o); //2
+        }
+        foo3(obj2);
+        console.log(obj2.value) // 1
+        
+    </script>
+</body>
+
+</html>

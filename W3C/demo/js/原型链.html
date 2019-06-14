@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"> 
+
+</head>
+
+<body>
+<script>
+        function Person() {
+
+        }
+        // 虽然写在注释里，但是你要注意：
+        // prototype是函数才会有的属性
+        Person.prototype.name = 'Kevin';
+
+        var person1 = new Person();
+        var person2 = new Person();
+        console.log(person1.name) // Kevin
+        console.log(person2.name) // Kevin
+        console.log(person1.__proto__ == Person.prototype) // true
+        console.log(Person.prototype.constructor == Person) // true
+        // 顺便学习一个ES5的方法,可以获得对象的原型
+        console.log(Object.getPrototypeOf(person1) === Person.prototype) // true
+
+        var person = new Person();
+        person.name = 'Daisy';
+        console.log(person.name) // Daisy
+        delete person.name;
+        console.log(person.name) // Kevin
+
+        var obj = new Object();
+        obj.name = 'Kevin'
+        console.log(obj.name) // Kevin
+        console.log(Object.prototype.__proto__ === null) // true
+
+</script>
+</body>
+</html>
