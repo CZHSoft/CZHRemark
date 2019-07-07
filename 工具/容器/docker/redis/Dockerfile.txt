@@ -1,0 +1,4 @@
+FROM redis:3.2.1
+EXPOSE 6379
+ADD redis.conf /redis.conf
+ENTRYPOINT [ "redis-server", "/redis.conf" ]
