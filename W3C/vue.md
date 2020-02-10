@@ -10,3 +10,9 @@
 > * 7.安装脚手架: vue init webpack vue01
 > * 8.包安装: npm install echart
 > * 9.调试运行: npm run dev
+
+## 常用包
+> * element-ui
+> * vue-router
+> * axios
+> * echarts
