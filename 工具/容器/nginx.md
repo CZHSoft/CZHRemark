@@ -5,36 +5,25 @@ http://nginx.org/en/download.html
 选中合适的版本，解压到目录下。    
 
 ## 常用命令
---启动  
-> * start nginx
---查看进程  
-> * tasklist /fi "imagename eq nginx.exe"
---快速停止   
-> * nginx -s stop
---关闭  
-> * nginx -s quit
---重启  
-> * nginx -s reload
+> * start nginx--启动  
+> * tasklist /fi "imagename eq nginx.exe"--查看进程  
+> * nginx -s stop--快速停止
+> * nginx -s quit--关闭 
+> * nginx -s reload--重启
 
 ## nginx.conf配置
---工作进程数，一般设置为cpu核心数  
-> * worker_processes  1;
+> * worker_processes  1; --工作进程数，一般设置为cpu核心数  
 
 ### events节点
---最大连接数，一般设置为cpu*2048  
-> * worker_connections  1024;
+> * worker_connections  1024;--最大连接数，一般设置为cpu*2048  
 
 ### server 节点
---监听的端口号  
-> *  listen 80; 
---访问域名  
-> * server_name www.abc.com;
+> *  listen 80; --监听的端口号
+> * server_name www.abc.com;--访问域名  
 
 #### location子节点 
---为项目的实际访问地址  
-> * proxy_pass:http://127.0.0.1:8280;
---索引文件  
-> * index index.html index.htm;
+> * proxy_pass:http://127.0.0.1:8280;--为项目的实际访问地址  
+> * index index.html index.htm;--索引文件  
 
 ## 负载均衡
 
@@ -71,3 +60,26 @@ stream {
         proxy_pass dotsocket;  
     }  
 }  
+
+## vuejs部署
+
+### vuejs打包
+> * build>>utils.js>>return ExtractTextPlugin.extract({use: loaders,fallback: 'vue-style-loader', publicPath:'../../'})
+> * config>>index.js>>build: { assetsPublicPath: './', }
+> * npm run build
+
+### nginx配置(nginx.conf)
+http {  
+    server {  
+        listen       9080;  
+        server_name  localhost;  
+  
+        location / {  
+            root   D:\webroot\dist;  
+            index  index.html index.htm;  
+			try_files $uri $uri/ /index.html;  
+        }  
+         ...  
+		 
+
+
