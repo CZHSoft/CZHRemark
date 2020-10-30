@@ -620,6 +620,63 @@ SELECT * FROM table WITH (HOLDLOCK)
 
 --经验：select 查询 不加锁的情况 添加 nolock，在提升性能的同时，也会产生脏读现象。
 
+### 查询慢查询
+--排查历史慢查询：
+SELECT TOP 20  
+  [Total IO] = (qs.total_logical_reads + qs.total_logical_writes)  
+  , [Average IO] = (qs.total_logical_reads + qs.total_logical_writes) /  
+                                            qs.execution_count  
+  , qs.execution_count  
+  , SUBSTRING (qt.text,(qs.statement_start_offset/2) + 1,  
+  ((CASE WHEN qs.statement_end_offset = -1  
+    THEN LEN(CONVERT(NVARCHAR(MAX), qt.text)) * 2  
+    ELSE qs.statement_end_offset  
+    END - qs.statement_start_offset)/2) + 1) AS [Individual Query]  
+  , qt.text AS [Parent Query]  
+  , DB_NAME(qt.dbid) AS DatabaseName  
+  , qp.query_plan  
+FROM sys.dm_exec_query_stats qs  
+CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) as qt  
+CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp  
+ORDER BY [Average IO]  DESC  
+  
+--查询当前正在执行的慢查询：
+SELECT  TOP 1 ST.transaction_id AS TransactionID ,  
+        st.session_id ,  
+        DB_NAME(DT.database_id) AS DatabaseName ,  
+        ses.host_name ,  
+        ses.login_name ,  
+        ses.status,  
+        AT.transaction_begin_time AS TransactionStartTime ,  
+        s.text ,  
+        c.connect_time ,  
+        DATEDIFF(second, AT.transaction_begin_time, GETDATE()) "exec_time(s)" ,  
+        DATEDIFF(minute, AT.transaction_begin_time, GETDATE()) AS Tran_run_time ,  
+        CASE AT.transaction_type  
+          WHEN 1 THEN 'Read/Write Transaction'  
+          WHEN 2 THEN 'Read-Only Transaction'  
+          WHEN 3 THEN 'System Transaction'  
+          WHEN 4 THEN 'Distributed Transaction'  
+        END AS TransactionType ,  
+        CASE AT.transaction_state  
+          WHEN 0 THEN 'Transaction Not Initialized'  
+          WHEN 1 THEN 'Transaction Initialized & Not Started'  
+          WHEN 2 THEN 'Active Transaction'  
+          WHEN 3 THEN 'Transaction Ended'  
+          WHEN 4 THEN 'Distributed Transaction Initiated Commit Process'  
+          WHEN 5 THEN 'Transaction in Prepared State & Waiting Resolution'  
+          WHEN 6 THEN 'Transaction Committed'  
+          WHEN 7 THEN 'Transaction Rolling Back'  
+          WHEN 8 THEN 'Transaction Rolled Back'  
+        END AS TransactionState  
+FROM    sys.dm_tran_session_transactions AS ST  
+        INNER JOIN sys.dm_tran_active_transactions AS AT ON ST.transaction_id = AT.transaction_id  
+        INNER JOIN sys.dm_tran_database_transactions AS DT ON ST.transaction_id = DT.transaction_id  
+        LEFT JOIN sys.dm_exec_connections AS C ON st.session_id = c.session_id  
+        LEFT JOIN sys.dm_exec_sessions AS ses ON c.session_id = ses.session_id  
+        CROSS APPLY sys.dm_exec_sql_text(c.most_recent_sql_Handle) s  
+WHERE   DATEDIFF(second, AT.transaction_begin_time, GETDATE()) > 2  
+
 
 
 
